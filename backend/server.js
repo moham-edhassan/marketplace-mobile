@@ -12,7 +12,6 @@ const app = express();
 
 const PORT = process.env.PORT || 3003;
 
-connectDB(process.env.DATABASE_URL);
 
 async function initDB(){
     try{
@@ -36,7 +35,9 @@ async function initDB(){
 app.get('/',(req,res) =>{
     res.send("It's working 123");
 })
-app.listen(PORT, ()=>{
-    console.log("server is running on port:", PORT);
-});
 
+initDB().then(()=>{
+    app.listen(PORT, ()=>{
+        console.log("server is running on port:", PORT);
+    });
+})
