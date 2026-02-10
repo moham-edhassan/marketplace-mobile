@@ -10,7 +10,10 @@ dotenv.config();
 
 const app = express();
 
-const PORT = process.env.PORT || 3003;
+//middleware to parse JSON body
+app.use(express.json());
+
+const PORT = process.env.PORT || 5001;
 
 
 async function initDB(){
@@ -32,8 +35,23 @@ async function initDB(){
     }
 }
 
-app.get('/',(req,res) =>{
-    res.send("It's working 123");
+app.post("/api/transactions", async(req,res) => {
+    try{
+        const {title, amount, category, user_id} = req.body;
+        if( !title || !user_id || amount === undefined || !category){
+            return res.status(400).json({error: "All fields are required"});
+        }
+        const transaction = await sql`
+            INSERT INTO transactions(user_id, title, amount, category)
+            VALUES(${user_id}, ${title}, ${amount}, ${category})
+            RETURNING *`;
+            //returning the transaction data
+            console.log(transaction);
+            res.status(201).json(transaction[0]);
+    }catch(error){
+        console.error("Error creating the transaction:", error);
+        res.status(500).json({error: "Internal server error"});
+    }
 })
 
 initDB().then(()=>{
